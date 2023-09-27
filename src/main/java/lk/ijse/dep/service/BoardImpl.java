@@ -1,11 +1,42 @@
 package lk.ijse.dep.service;
 
-public abstract class BoardImpl implements Board {
-    private Piece piece[][];
+public class BoardImpl implements Board {
+    private final Piece[][] piece;
 
-    private BoardUI boardUI;
+    private final BoardUI boardUI;
 
     public BoardImpl(BoardUI boardUI) {
         this.boardUI = boardUI;
+        this.piece = new Piece[NUM_OF_COLS][NUM_OF_ROWS];
+    }
+
+    @Override
+    public BoardUI getBoardUI() {
+        return null;
+    }
+
+    @Override
+    public int findNextAvailableSpot(int col) {
+        return 0;
+    }
+
+    @Override
+    public boolean isLegalMove(int col) {
+        return false;
+    }
+
+    @Override
+    public boolean exitLegalMoves() {
+        return false;
+    }
+
+    @Override
+    public void updateMove(int col, Piece move) {
+
+    }
+
+    @Override
+    public Winner findWinner() {
+        return null;
     }
 }
