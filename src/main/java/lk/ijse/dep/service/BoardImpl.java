@@ -78,7 +78,7 @@ public class BoardImpl implements Board {
                     }
                 }
                 if (equal) {
-                    winner = new Winner(piece[j][i], j, i, i+3, j);
+                    winner = new Winner(piece[j][i], j, i, j+3, i);
                     return winner;
                 }
             }
