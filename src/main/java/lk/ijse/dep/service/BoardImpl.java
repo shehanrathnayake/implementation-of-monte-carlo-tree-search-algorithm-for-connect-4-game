@@ -23,7 +23,7 @@ public class BoardImpl implements Board {
 
     @Override
     public int findNextAvailableSpot(int col) {
-        for (int i = 0; i <= NUM_OF_ROWS; i++) {
+        for (int i = 0; i < NUM_OF_ROWS; i++) {
             if (piece[col][i] == Piece.EMPTY) return i;
         }
         return -1;
@@ -45,7 +45,7 @@ public class BoardImpl implements Board {
 
     @Override
     public void updateMove(int col, Piece move) {
-        move = piece[col][findNextAvailableSpot(col)];
+        piece[col][findNextAvailableSpot(col)] = move;
     }
 
     @Override
@@ -53,25 +53,33 @@ public class BoardImpl implements Board {
         Winner winner = null;
 
         for (int i = 0; i < NUM_OF_COLS; i++) {
-            for (int j = 0; j < NUM_OF_ROWS; j++) {
-                if (piece[i][j+3] == Piece.EMPTY) break;
+            for (int j = 0; j+3 < NUM_OF_ROWS; j++) {
+                boolean equal = true;
                 for (int k = 0; k < 3; k++) {
-                    if (piece[i][j+k] == piece[i][j+k+1]) {
-                        winner = new Winner(piece[i][j], i, j, i, j + 3);
-                        return winner;
+                    if (piece[i][j+k] == Piece.EMPTY || piece[i][j+k+1] == Piece.EMPTY || piece[i][j+k] != piece[i][j+k+1]) {
+                        equal = false;
+                        break;
                     }
+                }
+                if (equal) {
+                    winner = new Winner(piece[i][j], i, j, i, j + 3);
+                    return winner;
                 }
             }
         }
 
         for (int i = 0; i < NUM_OF_ROWS; i++) {
-            for (int j = 0; j < NUM_OF_COLS; j++) {
-                if (piece[i][j+3] == Piece.EMPTY) break;
+            for (int j = 0; j+3 < NUM_OF_COLS; j++) {
+                boolean equal = true;
                 for (int k = 0; k < 3; k++) {
-                    if (piece[i][j+k] == piece[i][j+k+1]) {
-                        winner = new Winner(piece[i][j], i, j, i, j + 3);
-                        return winner;
+                    if (piece[j+k][i] == Piece.EMPTY || piece[j+k+1][i] == Piece.EMPTY || piece[j+k][i] != piece[j+k+1][i]) {
+                        equal = false;
+                        break;
                     }
+                }
+                if (equal) {
+                    winner = new Winner(piece[j][i], j, i, i+3, j);
+                    return winner;
                 }
             }
         }
