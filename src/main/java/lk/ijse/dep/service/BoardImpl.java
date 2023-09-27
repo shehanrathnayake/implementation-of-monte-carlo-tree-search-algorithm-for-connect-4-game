@@ -8,35 +8,76 @@ public class BoardImpl implements Board {
     public BoardImpl(BoardUI boardUI) {
         this.boardUI = boardUI;
         this.piece = new Piece[NUM_OF_COLS][NUM_OF_ROWS];
+
+        for (int i = 0; i < NUM_OF_COLS; i++) {
+            for (int j = 0; j < NUM_OF_ROWS; j++) {
+                piece[i][j] = Piece.EMPTY;
+            }
+        }
     }
 
     @Override
     public BoardUI getBoardUI() {
-        return null;
+        return boardUI;
     }
 
     @Override
     public int findNextAvailableSpot(int col) {
-        return 0;
+        for (int i = 0; i <= NUM_OF_ROWS; i++) {
+            if (piece[col][i] == Piece.EMPTY) return i;
+        }
+        return -1;
     }
 
     @Override
     public boolean isLegalMove(int col) {
-        return false;
+        if (findNextAvailableSpot(col) != -1) return true;
+        else return false;
     }
 
     @Override
-    public boolean exitLegalMoves() {
+    public boolean existLegalMoves() {
+        for (int i = 0; i < NUM_OF_COLS; i++) {
+            if (isLegalMove(i)) return true;
+        }
         return false;
     }
 
     @Override
     public void updateMove(int col, Piece move) {
-
+        move = piece[col][findNextAvailableSpot(col)];
     }
 
     @Override
     public Winner findWinner() {
-        return null;
+        Winner winner = null;
+
+        for (int i = 0; i < NUM_OF_COLS; i++) {
+            for (int j = 0; j < NUM_OF_ROWS; j++) {
+                if (piece[i][j+3] == Piece.EMPTY) break;
+                for (int k = 0; k < 3; k++) {
+                    if (piece[i][j+k] == piece[i][j+k+1]) {
+                        winner = new Winner(piece[i][j], i, j, i, j + 3);
+                        return winner;
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < NUM_OF_ROWS; i++) {
+            for (int j = 0; j < NUM_OF_COLS; j++) {
+                if (piece[i][j+3] == Piece.EMPTY) break;
+                for (int k = 0; k < 3; k++) {
+                    if (piece[i][j+k] == piece[i][j+k+1]) {
+                        winner = new Winner(piece[i][j], i, j, i, j + 3);
+                        return winner;
+                    }
+                }
+            }
+        }
+
+        if (winner == null) winner = new Winner(Piece.EMPTY);
+
+        return winner;
     }
 }
