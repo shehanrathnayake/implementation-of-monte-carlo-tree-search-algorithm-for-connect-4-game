@@ -1,8 +1,6 @@
 package lk.ijse.dep.service;
 
 public abstract class Player {
-
-    //implemented
     protected Board board;
 
     public Player(Board board) {
