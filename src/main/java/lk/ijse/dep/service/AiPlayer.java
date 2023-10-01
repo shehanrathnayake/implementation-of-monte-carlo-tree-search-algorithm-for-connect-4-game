@@ -1,10 +1,6 @@
 package lk.ijse.dep.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-
-import static java.lang.Math.log;
-import static java.lang.Math.sqrt;
 
 public class AiPlayer extends Player{
     // implemented
@@ -20,7 +16,7 @@ public class AiPlayer extends Player{
             private int col;
             private Node parent = null;
             private int visits = 0;
-            private double uctValue = 0;
+            private int wins = 0;
             private double ucbValue = 0;
             private ArrayList<Node> childArray = new ArrayList<>();
 
@@ -72,9 +68,7 @@ public class AiPlayer extends Player{
             * */
             private void expand(Node parentNode) {
                 for (int i = 0; i < 6; i++) {
-                    if (board.isLegalMove(i)){
-                        parentNode.childArray.add(new Node(i, parentNode));
-                    }
+                    parentNode.childArray.add(new Node(i, parentNode));
                 }
                 rollOut(parentNode.childArray.get(0));
             }
@@ -89,26 +83,29 @@ public class AiPlayer extends Player{
 
             private void rollOut(Node nonVisitedNode) {
 
-                BoardImpl logicalBoard = new BoardImpl(board.getBoardUI());
-                Piece currentPlayer = Piece.GREEN;
-
                 // Simulate a random game starting from the current state
-                int visits = 0;
-                while (logicalBoard.findWinner().getWinningPiece() == Piece.EMPTY  && logicalBoard.existLegalMoves()) {
-                    int randomMove;
-                    do{
-                        randomMove = (int) (Math.random() * 10);
-                    } while(!(randomMove >= 0 && randomMove < 6 && logicalBoard.isLegalMove(randomMove)));
+                int wins = 0;
+                for (int i = 0; i < 2; i++) {
+                    BoardImpl logicalBoard = new BoardImpl(board.getBoardUI());
+                    Piece currentPlayer = Piece.GREEN;
+                    Piece winningPiece;
 
-                    logicalBoard.updateMove(randomMove, currentPlayer);  // Update with the current player's piece
+                    while ((winningPiece = logicalBoard.findWinner().getWinningPiece()) == Piece.EMPTY  && logicalBoard.existLegalMoves()) {
 
-                    currentPlayer = (currentPlayer == Piece.GREEN) ? Piece.BLUE : Piece.GREEN;  // Switch to the other player
-                    visits++;
+                        int randomMove;
+                        do{
+                            randomMove = (int) (Math.random() * 6);
+                        } while(randomMove == 6 || !logicalBoard.isLegalMove(randomMove));
+                        logicalBoard.updateMove(randomMove, currentPlayer);  // Update with the current player's piece
+
+                        currentPlayer = (currentPlayer == Piece.GREEN) ? Piece.BLUE : Piece.GREEN;  // Switch to the other player
+                    }
+
+                    wins += ((winningPiece == Piece.GREEN) ? 1 : 0);
                 }
 
                 // Update the node's statistics based on the result of the simulated game
-                double uctValue = ((logicalBoard.findWinner().getWinningPiece() == Piece.GREEN) ? 1 : 0)/(visits * 1.0);
-                backPropagate(nonVisitedNode, uctValue);
+                backPropagate(nonVisitedNode, wins);
             }
 
             /*              Back propagation phase
@@ -118,17 +115,15 @@ public class AiPlayer extends Player{
              *
              * */
 
-            private void backPropagate(Node rolledOutNode, double uctValue) {
+            private void backPropagate(Node rolledOutNode, int win) {
                 Node traversingNode = rolledOutNode;
-                traversingNode.uctValue += uctValue;
+                traversingNode.wins += win;
                 traversingNode.visits ++;
-                Node parentTraversingNode;
 
                 while(traversingNode.parent != null) {
-                    parentTraversingNode = traversingNode.parent;
-                    parentTraversingNode.uctValue += uctValue;
+                    Node parentTraversingNode = traversingNode.parent;
+                    parentTraversingNode.wins += win;
                     parentTraversingNode.visits ++;
-                    traversingNode.ucbValue = traversingNode.uctValue + 2 * sqrt(Math.log(traversingNode.parent.visits) / traversingNode.visits);
                     traversingNode = traversingNode.parent;
                 }
                 updateMaxUcbNode(rootNode);
@@ -144,7 +139,9 @@ public class AiPlayer extends Player{
                 if (node == rootNode && node.childArray.size() == 0) return;
                 for (Node child : node.childArray) {
                     if (child.visits > 0) {
-                        if (maxUcbNode == null || child.ucbValue > maxUcbNode.ucbValue) {
+                        child.ucbValue = child.wins/(child.visits * 1.0) + Math.sqrt(2) * Math.sqrt(Math.log(child.parent.visits) /child.visits);
+
+                        if (board.isLegalMove(child.col) && (maxUcbNode == null || child.ucbValue > maxUcbNode.ucbValue)) {
                             maxUcbNode = child;
                         }
                         if (child.childArray.size() != 0) {
@@ -177,7 +174,7 @@ public class AiPlayer extends Player{
                 int bestMove = avoidDefeatMove();
                 if (bestMove == -1) {
                     rootNode = new Node();
-                    for (int i = 0; i < 10000; i++) {
+                    for (int i = 0; i < 6; i++) {
                         select(rootNode);
                     }
                     bestMove = maxUcbNode.col;
@@ -194,16 +191,7 @@ public class AiPlayer extends Player{
          *
          * */
 
-        int count = 0;
-        int availableCol = 0;
-        for (int i = 0; i < 6; i++) {
-            if (board.findNextAvailableSpot(i) == -1) {
-                count++;
-            } else availableCol = i;
-        }
-        if (count == 5) {
-            col = availableCol;
-        } else col = new MonteCarloTreeSearch().bestMove();
+        col = new MonteCarloTreeSearch().bestMove();
 
         /* Rest of the AiPlayer class*/
 
@@ -216,6 +204,5 @@ public class AiPlayer extends Player{
         } else if (!board.existLegalMoves()){
             board.getBoardUI().notifyWinner(new Winner(Piece.EMPTY));
         }
-
     }
 }
