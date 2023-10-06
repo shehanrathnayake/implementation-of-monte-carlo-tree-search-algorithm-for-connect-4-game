@@ -15,8 +15,10 @@ public class AiPlayer extends Player{
         /*===================================================================================================================================================*/
 
         /*              AiPlayer Class
-         * Check whether the opponent is going to win, if so make arrangement to defend.
-         * Else making an instance of MonteCarloTreeSeach class and get returned the best move
+         * Getting the current state of the game.
+         * Check whether the AI player is going to win in the next move, so the result of the monte carlo algorithm assign to col
+         * Check if the human player is going to win in the next move, so the defending column assign to col
+         * If not satisfy above two, assign the result of the monte carlo algorithm assign to col
          *
          * */
 
@@ -32,7 +34,7 @@ public class AiPlayer extends Player{
         }
         System.out.println(mcts.finalMove);
 
-        /* Rest of the AiPlayer class*/
+        /* Updating the actual board and check if there is a winner */
 
         board.updateMove(col, Piece.GREEN);
         board.getBoardUI().update(col, false);
@@ -45,6 +47,7 @@ public class AiPlayer extends Player{
         }
     }
 
+    /* Check whether human player has put 3 blue balls together and going to win in the next turn. If, check the position and avoid the defeat returning the column value */
     private int avoidDefeatMove(Board currentState) {
         // Check vertical combinations
         for (int i = 0; i < Board.NUM_OF_COLS; i++) {
@@ -77,6 +80,7 @@ public class AiPlayer extends Player{
         return -1;
     }
 
+    /*          Get Current updated Piece array of the game */
     public static Piece[][] getCurrentStatePiece() {
 
         Piece[][] currentStatePiece = new Piece[Board.NUM_OF_COLS][Board.NUM_OF_ROWS];
@@ -85,12 +89,12 @@ public class AiPlayer extends Player{
         for (int i = 0; i < Board.NUM_OF_COLS; i++) {
             for (int j = 0; j < Board.NUM_OF_ROWS; j++) {
                 currentStatePiece[i][j] = boardPiece[i][j];
-//                System.out.print(currentStatePiece[i][j] + " ");
             }
         }
         return currentStatePiece;
     }
 
+    /*          Get Current State of the game */
     public static BoardImpl getCurrentState(BoardImpl logicalBoard) {
         Piece[][] currentStatePiece = getCurrentStatePiece();
         for (int i = 0; i < Board.NUM_OF_ROWS; i++) {
@@ -127,14 +131,12 @@ public class AiPlayer extends Player{
         /*              Best move
 
          * Starting point
-         * Check whether avoidDefeatMove() returns column number or -1
-         * If it returns column number, returns it. Else continue Monte Carlo Tree search algo and returns the best move column number
+         * Call select method iterating all possible move nodes
+         * After all, select the column with highest possible chance of winning and return it
          *
          * */
 
-        MonteCarloTreeSearch() {
-//            this.logicalBoard = logicalBoard;
-        }
+        MonteCarloTreeSearch() {}
 
         private int bestMove() {
             rootNode = new Node();
@@ -179,7 +181,7 @@ public class AiPlayer extends Player{
 
         /*              Expansion phase
 
-         * Add 5 child nodes to the child arraylist. (Only if it is a legal move)
+         * Add 5 child nodes to the child arraylist.
          * Then send the first child for rollout process
          *
          * */
@@ -192,9 +194,8 @@ public class AiPlayer extends Player{
 
         /*              Rollout phase
 
-         * Creating a logical board with the current status and play a simulation with random move until a terminal state coming (win, lose or tie)
-         * Calculating the UCT value (win/visits)
-         * Send the rollout node and UCT value for back propagation
+         * Creating a logical board with the current state and play a simulation with random move until a terminal state coming (win, lose or tie)
+         * Send the rollout node wins and moves values for back propagation
          *
          * */
 
@@ -231,20 +232,16 @@ public class AiPlayer extends Player{
                 moves = 0;
             }
             else wins = 1;
-//            wins += ((winningPiece == Piece.GREEN) ? 1 : 0);
-            System.out.println(nonVisitedNode.col + ", " + wins + ", " + moves);
-            if (winningPiece == Piece.GREEN && moves == 1) {
-                this.finalMove = true;
-                System.out.println(finalMove);
-            }
-//            if (winningPiece == Piece.BLUE) moves = 0;
+
+            if (winningPiece == Piece.GREEN && moves == 1) this.finalMove = true;
+
             // Update the node's statistics based on the result of the simulated game
             backPropagate(nonVisitedNode, wins, moves);
         }
 
         /*              Back propagation phase
 
-         * Traversing to the root updating new UCT value, no of visits and new UCB values
+         * Traversing to the root updating new heuristic values
          * Calling to update maxUsbNode which hold the highest UCB value among all the visited nodes in the entire tree.
          *
          * */
@@ -268,12 +265,12 @@ public class AiPlayer extends Player{
 
         /*              Updating maxUCBNode
 
-         * Find the node which has the highest value of UCB value among nodes that have been visited at least one by traversing the entire tree.
+         * Find the node which has the highest heuristic values among nodes that have been visited at least ones by traversing the entire tree.
+         * Checks the no of wins and no of moves during the rollout process
          *
          * */
 
         private void updateMaxUcbNode(Node node) {
-//            System.out.println("===================================");
             if (node == rootNode && node.childArray.size() == 0) return;
             for (Node child : node.childArray) {
                 if (child.visits > 0) {
