@@ -32,7 +32,6 @@ public class AiPlayer extends Player{
             if (bestMoveToDefend == -1) col = bestMoveToWin;
             else col = bestMoveToDefend;
         }
-        System.out.println(mcts.finalMove);
 
         /* Updating the actual board and check if there is a winner */
 
