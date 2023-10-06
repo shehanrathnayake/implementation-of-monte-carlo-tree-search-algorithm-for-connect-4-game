@@ -54,6 +54,11 @@ public class BoardImpl implements Board {
     }
 
     @Override
+    public Piece[][] getPiece() {
+        return piece;
+    }
+
+    @Override
     public Winner findWinner() {
         Winner winner = null;
 
