@@ -152,8 +152,8 @@ public class AiPlayer extends Player{
 
         /*              Selection phase
 
-         * If root comes for the first iteration, he has no child, so send him for expansion process. Here where tree is started to be built.
-         * From the second iteration root has children array so checks the children one by one whether they have been visited at least one. if not send the first non visited child for rollout process
+         * If root comes for the first iteration, he has no child, so send him for expansion process. Here where tree is started to be built Then rollout the first node.
+         * From the second iteration root has children array so checks the children one by one after the first node whether they have been visited at least once. if not send the first non visited child for rollout process
          * If all children have been visited, then select the child that have higher UCB value. if he has children, send him for select method as a parent node (Recursion). Else send him for expansion process
          *
          * */
