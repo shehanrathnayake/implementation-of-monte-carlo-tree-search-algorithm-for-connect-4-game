@@ -142,7 +142,7 @@ public class AiPlayer extends Player{
             for (int i = 0; i < 6; i++) {
                 select(rootNode);
             }
-            if (maxUcbNodes.size() == 0) bestMove();
+            if (maxUcbNodes == null || maxUcbNodes.size() == 0) bestMove();
             int bestMove;
             do {
                 bestMove = (int) (Math.random() * maxUcbNodes.size());
